@@ -1,0 +1,35 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: musepropark
+      POSTGRES_USER: musepropark
+      POSTGRES_PASSWORD: musepropark
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+  cms:
+    build:
+      context: .
+      dockerfile: apps/cms/Dockerfile
+    environment:
+      DATABASE_URL: postgres://musepropark:musepropark@postgres:5432/musepropark
+      PAYLOAD_SECRET: change-me
+    depends_on:
+      - postgres
+    ports:
+      - "3001:3001"
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    depends_on:
+      - cms
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data:
